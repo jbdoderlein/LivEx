@@ -27,7 +27,7 @@ export function generateExample(): string {
 
 export function generateExecRequest(defList: DefinitionList): Object {
     const result: any = {};
-    for (const def of defList.defs) {
+    for (const def of defList.defs) { // first pass to register all example names
         if (isExample(def)) {
             const ex = {
                 "method": def.target.name,
@@ -35,10 +35,18 @@ export function generateExecRequest(defList: DefinitionList): Object {
                 "probes": []
             };
             result[def.name] = ex;
-        } else if (isProbe(def)) {
+        } 
+    }
+    for (const def of defList.defs) { // second pass to register probes for examples
+        if (isProbe(def)) {
+            const probedExpr = {
+                "target": def.expr.target,
+                "lang": def.expr.lang ? def.expr.lang : "",
+                "scopes": def.expr.scopes,
+            }
             const probe = {
                 "line": def.line,
-                "expr": def.expr,
+                "expr": probedExpr,
                 "condition": def.condition
             };
             result[def.example_name.$refText]["probes"].push(probe);

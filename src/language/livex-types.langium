@@ -18,12 +18,25 @@ interface Arg { // for now, numeric constants or variables; later will have to b
 }
 
 interface State { // TODO
-    name: string 
+    setup_statements: string[]
 }
 
 interface Probe {
     line: number
     example_name: @Example
-    expr: string
+    expr: ProbedExpr
     condition: string = "True" // if no condition is specified, always display the probe result
+}
+
+interface ProbedExpr {
+    lang?: 'PY' | 'JS'
+    scopes: string[]
+    target: string
+}
+
+interface Replacement {
+    line: number
+    example_name: @Example
+    values: string[]
+    expr: string
 }
