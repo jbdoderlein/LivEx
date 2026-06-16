@@ -4,6 +4,26 @@ import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { extractDestinationAndName } from './cli-util.js';
 
+export interface ExecRequest {
+    [exampleName: string]: ExecRequestExample;
+}
+
+export interface ExecRequestExample {
+    method: string;
+    args: Array<number | string>;
+    probes: ExecRequestProbe[];
+}
+
+export interface ExecRequestProbe {
+    line: number;
+    expr: {
+        target: string;
+        lang: string;
+        scopes: string[];
+    };
+    condition: string;
+}
+
 export function generateJavaScript(model: DefinitionList, filePath: string, destination: string | undefined): string {
     const data = extractDestinationAndName(filePath, destination);
     const generatedFilePath = `${path.join(data.destination, data.name)}.js`;
@@ -25,8 +45,8 @@ export function generateExample(): string {
     return "Oh wow hi"
 }
 
-export function generateExecRequest(defList: DefinitionList): Object {
-    const result: any = {};
+export function generateExecRequest(defList: DefinitionList): ExecRequest {
+    const result: ExecRequest = {};
     for (const def of defList.defs) { // first pass to register all example names
         if (isExample(def)) {
             const ex = {

@@ -3,15 +3,15 @@ import { EmptyFileSystem, type LangiumDocument } from "langium";
 import { expandToString as s } from "langium/generate";
 import { parseHelper } from "langium/test";
 import { createLivExServices } from "../../src/language/livex-module.js";
-import { Model, isModel } from "../../src/language/generated/ast.js";
+import { DefinitionList, isDefinitionList, isExample, isProbe } from "../../src/language/generated/ast.js";
 
 let services: ReturnType<typeof createLivExServices>;
-let parse:    ReturnType<typeof parseHelper<Model>>;
-let document: LangiumDocument<Model> | undefined;
+let parse:    ReturnType<typeof parseHelper<DefinitionList>>;
+let document: LangiumDocument<DefinitionList> | undefined;
 
 beforeAll(async () => {
     services = createLivExServices(EmptyFileSystem);
-    parse = parseHelper<Model>(services.LivEx);
+    parse = parseHelper<DefinitionList>(services.LivEx);
 
     // activate the following if your linking test requires elements from a built-in library, for example
     // await services.shared.workspace.WorkspaceManager.initializeWorkspace([]);
@@ -19,10 +19,10 @@ beforeAll(async () => {
 
 describe('Parsing tests', () => {
 
-    test('parse simple model', async () => {
+    test('parse simple LivEx model', async () => {
         document = await parse(`
-            person Langium
-            Hello Langium!
+            exampleOne: compute(1, "value")
+            [12] exampleOne: probe PY .frame:answer if £answer > 0£
         `);
 
         // check for absensce of parser errors the classic way:
@@ -35,16 +35,16 @@ describe('Parsing tests', () => {
             // prior to the tagged template expression we check for validity of the parsed document object
             //  by means of the reusable function 'checkDocumentValid()' to sort out (critical) typos first;
             checkDocumentValid(document) || s`
-                Persons:
-                  ${document.parseResult.value?.persons?.map(p => p.name)?.join('\n  ')}
-                Greetings to:
-                  ${document.parseResult.value?.greetings?.map(g => g.person.$refText)?.join('\n  ')}
+                Examples:
+                  ${document.parseResult.value?.defs?.filter(isExample).map(example => example.name)?.join('\n  ')}
+                Probes:
+                  ${document.parseResult.value?.defs?.filter(isProbe).map(probe => `${probe.example_name.$refText}:${probe.expr.target}`)?.join('\n  ')}
             `
         ).toBe(s`
-            Persons:
-              Langium
-            Greetings to:
-              Langium
+            Examples:
+              exampleOne
+            Probes:
+              exampleOne:answer
         `);
     });
 });
@@ -55,6 +55,6 @@ function checkDocumentValid(document: LangiumDocument): string | undefined {
           ${document.parseResult.parserErrors.map(e => e.message).join('\n  ')}
     `
         || document.parseResult.value === undefined && `ParseResult is 'undefined'.`
-        || !isModel(document.parseResult.value) && `Root AST object is a ${document.parseResult.value.$type}, expected a '${Model}'.`
+        || !isDefinitionList(document.parseResult.value) && `Root AST object is a ${document.parseResult.value.$type}, expected a '${DefinitionList}'.`
         || undefined;
 }

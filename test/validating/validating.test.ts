@@ -4,15 +4,15 @@ import { expandToString as s } from "langium/generate";
 import { parseHelper } from "langium/test";
 import type { Diagnostic } from "vscode-languageserver-types";
 import { createLivExServices } from "../../src/language/livex-module.js";
-import { Model, isModel } from "../../src/language/generated/ast.js";
+import { DefinitionList, isDefinitionList } from "../../src/language/generated/ast.js";
 
 let services: ReturnType<typeof createLivExServices>;
-let parse:    ReturnType<typeof parseHelper<Model>>;
-let document: LangiumDocument<Model> | undefined;
+let parse:    ReturnType<typeof parseHelper<DefinitionList>>;
+let document: LangiumDocument<DefinitionList> | undefined;
 
 beforeAll(async () => {
     services = createLivExServices(EmptyFileSystem);
-    const doParse = parseHelper<Model>(services.LivEx);
+    const doParse = parseHelper<DefinitionList>(services.LivEx);
     parse = (input: string) => doParse(input, { validation: true });
 
     // activate the following if your linking test requires elements from a built-in library, for example
@@ -23,7 +23,8 @@ describe('Validating', () => {
   
     test('check no errors', async () => {
         document = await parse(`
-            person Langium
+            exampleOne: compute(1, "value")
+            [12] exampleOne: probe :answer
         `);
 
         expect(
@@ -31,13 +32,13 @@ describe('Validating', () => {
             //  'checkDocumentValid()' to sort out (critical) typos first,
             // and then evaluate the diagnostics by converting them into human readable strings;
             // note that 'toHaveLength()' works for arrays and strings alike ;-)
-            checkDocumentValid(document) || document?.diagnostics?.map(diagnosticToString)?.join('\n')
+            checkDocumentValid(document) || (document?.diagnostics?.map(diagnosticToString)?.join('\n') ?? '')
         ).toHaveLength(0);
     });
 
-    test('check capital letter validation', async () => {
+    test('check unresolved example reference validation', async () => {
         document = await parse(`
-            person langium
+            [12] missingExample: probe :answer
         `);
 
         expect(
@@ -45,7 +46,7 @@ describe('Validating', () => {
         ).toEqual(
             // 'expect.stringContaining()' makes our test robust against future additions of further validation rules
             expect.stringContaining(s`
-                [1:19..1:26]: Person name should start with a capital.
+                missingExample
             `)
         );
     });
@@ -57,7 +58,7 @@ function checkDocumentValid(document: LangiumDocument): string | undefined {
           ${document.parseResult.parserErrors.map(e => e.message).join('\n  ')}
     `
         || document.parseResult.value === undefined && `ParseResult is 'undefined'.`
-        || !isModel(document.parseResult.value) && `Root AST object is a ${document.parseResult.value.$type}, expected a '${Model}'.`
+        || !isDefinitionList(document.parseResult.value) && `Root AST object is a ${document.parseResult.value.$type}, expected a '${DefinitionList}'.`
         || undefined;
 }
 

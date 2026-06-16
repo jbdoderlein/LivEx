@@ -17,3 +17,25 @@ npm run serve:live
 ```
 
 The entrypoint is `src/app.ts` and the main way to interact with the service is with a POST request on `/api/code`. The service expects a JSON-formatted body with the field `example` corresponding to a valid LivEx program; the response is a JSON object where each example in the program has its name as a key, and an object containing the method to be called, its arguments, and a list of probes corresponding to the example.
+
+## Use as a Node module
+
+LivEx also exposes an ESM module API:
+
+```ts
+import { execRequestAction, parseLivEx } from 'livex';
+
+const source = `
+exampleOne: compute(1, "value")
+[12] exampleOne: probe PY .frame:answer if £answer > 0£
+`;
+
+const parsed = await parseLivEx(source);
+console.log(parsed.ast.defs);
+console.log(parsed.diagnostics);
+
+const request = execRequestAction(source);
+console.log(request.exampleOne.method);
+```
+
+The package exports generated AST types from `livex/ast` and the Langium service factory from `livex/services` when lower-level integration is needed.

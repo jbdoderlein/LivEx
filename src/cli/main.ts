@@ -4,7 +4,7 @@ import { Command } from 'commander';
 import { LivExLanguageMetaData } from '../language/generated/module.js';
 import { createLivExServices } from '../language/livex-module.js';
 import { extractAstNode } from './cli-util.js';
-import { generateExecRequest, generateJavaScript } from './generator.js';
+import { generateExecRequest, generateJavaScript, type ExecRequest } from './generator.js';
 import { NodeFileSystem } from 'langium/node';
 import * as url from 'node:url';
 import * as fs from 'node:fs/promises';
@@ -21,7 +21,7 @@ export const generateAction = async (fileName: string, opts: GenerateOptions): P
     console.log(chalk.green(`JavaScript code generated successfully: ${generatedFilePath}`));
 };
 
-export function execRequestAction(code: string): Object {
+export function execRequestAction(code: string): ExecRequest {
     const services = createLivExServices(NodeFileSystem).LivEx;
     const model = services.parser.LangiumParser.parse<DefinitionList>(code).value;
     // const model = await extractAstNode<Example>(fileName, services);

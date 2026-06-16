@@ -5,16 +5,37 @@
     "files": [
         "bin",
         "out",
-        "src"
+        "src",
+        "syntaxes",
+        "language-configuration.json"
     ],
     "type": "module",
+    "types": "./out/index.d.ts",
+    "exports": {
+        ".": {
+            "types": "./out/index.d.ts",
+            "import": "./out/index.js"
+        },
+        "./ast": {
+            "types": "./out/language/generated/ast.d.ts",
+            "import": "./out/language/generated/ast.js"
+        },
+        "./services": {
+            "types": "./out/language/livex-module.d.ts",
+            "import": "./out/language/livex-module.js"
+        },
+        "./package.json": "./package.json"
+    },
     "scripts": {
+        "prebuild": "npm run langium:generate:production",
         "build": "tsc -b tsconfig.src.json && node esbuild.mjs",
         "watch": "concurrently -n tsc,esbuild -c blue,yellow \"tsc -b tsconfig.src.json --watch\" \"node esbuild.mjs --watch\"",
         "lint": "eslint src --ext ts",
         "langium:generate": "langium generate",
         "langium:generate:production": "langium generate --mode=production",
         "langium:watch": "langium generate --watch",
+        "prepare": "npm run build",
+        "pretest": "npm run langium:generate",
         "vscode:prepublish": "npm run build && npm run lint",
         "build:web": "npm run build",
         "bundle": "vite build",
