@@ -13,8 +13,14 @@
     "types": "./out/index.d.ts",
     "exports": {
         ".": {
-            "types": "./out/index.d.ts",
-            "import": "./out/index.js"
+            "import": {
+                "types": "./out/index.d.ts",
+                "default": "./out/index.js"
+            },
+            "require": {
+                "types": "./out/index.d.cts",
+                "default": "./out/index.cjs"
+            }
         },
         "./ast": {
             "types": "./out/language/generated/ast.d.ts",
@@ -29,6 +35,7 @@
     "scripts": {
         "prebuild": "npm run langium:generate:production",
         "build": "tsc -b tsconfig.src.json && node esbuild.mjs",
+        "postbuild": "node scripts/emit-cjs-types.mjs",
         "watch": "concurrently -n tsc,esbuild -c blue,yellow \"tsc -b tsconfig.src.json --watch\" \"node esbuild.mjs --watch\"",
         "lint": "eslint src --ext ts",
         "langium:generate": "langium generate",

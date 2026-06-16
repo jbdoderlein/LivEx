@@ -27,8 +27,8 @@ const plugins = [{
 }];
 
 const ctx = await esbuild.context({
-    // Entry points for the vscode extension and the language server
-    entryPoints: ['src/extension/main.ts', 'src/language/main.ts'],
+    // Entry points for the vscode extension, language server, and CommonJS library API
+    entryPoints: ['src/extension/main.ts', 'src/language/main.ts', 'src/index.ts'],
     outdir: 'out',
     bundle: true,
     target: "ES2017",
