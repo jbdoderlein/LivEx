@@ -24,13 +24,13 @@ State returns State:
     'state' '[' (setup_statements+=ANY_STMT)+ ']';
 
 Probe returns Probe:
-    '[' line=INT ']' (example_name=[Example:ID] ':') 'probe' expr=ProbedExpr ('if' condition=ANY_EXPR)? ;
+    '[' line=INT ']' (example_name=[Example:ID] ':')? 'probe' expr=ProbedExpr ('if' condition=ANY_EXPR)? ;
 
 ProbedExpr returns ProbedExpr:
     (lang=('PY' | 'JS') )? ('.' scopes+=ID)* ":" target=ID ;
 
 Replacement returns Replacement:
-    '[' line=INT ']' (example_name=[Example:ID] ':') 'use' '[' ( values+=ANY_EXPR ';')* ']' 'for' expr=ANY_EXPR;
+    '[' line=INT ']' (example_name=[Example:ID] ':')? 'use' '[' ( values+=ANY_EXPR ';')* ']' 'for' expr=ANY_EXPR;
 
 
 hidden terminal WS: /\s+/;
